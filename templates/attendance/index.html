@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Management - Smart Student Management System{% endblock %}
+{% block header_title %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+        <div>
+            <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-clipboard-user me-2 text-success"></i> Attendance Overview</h4>
+            <p class="text-muted small mb-0">Track daily student attendance logs and attendance warnings.</p>
+        </div>
+        {% if session.get('user_role') in ['Admin', 'Faculty'] %}
+        <a href="{{ url_for('attendance.mark_attendance') }}" class="btn btn-primary">
+            <i class="fa-solid fa-square-check me-2"></i> Mark Attendance
+        </a>
+        {% endif %}
+    </div>
+
+    <form method="GET" action="{{ url_for('attendance.index') }}" class="row g-3">
+        <div class="col-md-5">
+            <select name="course_id" class="form-select">
+                <option value="">-- All Courses --</option>
+                {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input type="date" name="date" value="{{ selected_date.strftime('%Y-%m-%d') }}" class="form-control">
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-fill">Filter Date</button>
+            <a href="{{ url_for('attendance.index') }}" class="btn btn-outline-secondary"><i class="fa-solid fa-rotate-left"></i></a>
+        </div>
+    </form>
+</div>
+
+<!-- Attendance Warnings Panel (< 75%) -->
+{% if warning_students %}
+<div class="glass-panel p-4 mb-4 border-danger">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold text-danger mb-0">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> Mandatory Attendance Warning Watchlist (< 75%)
+        </h5>
+        <span class="badge bg-danger fs-6">{{ warning_students|length }} Students Affected</span>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table text-light">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Course</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w_stu in warning_students[:8] %}
+                <tr>
+                    <td class="fw-bold">{{ w_stu.roll_no }}</td>
+                    <td>{{ w_stu.full_name }}</td>
+                    <td>{{ w_stu.course.code if w_stu.course else '' }}</td>
+                    <td>
+                        <span class="fw-bold text-danger fs-6">{{ w_stu.attendance_percentage }}%</span>
+                    </td>
+                    <td><span class="badge bg-danger">Attendance Warning</span></td>
+                    <td>
+                        <a href="{{ url_for('student.view_student', student_id=w_stu.id) }}" class="btn btn-sm btn-outline-danger py-1">View Student</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Today's Logs Table -->
+<div class="glass-panel p-4">
+    <h5 class="fw-bold text-light mb-3">Logs for {{ selected_date.strftime('%B %d, %Y') }}</h5>
+    <div class="table-responsive">
+        <table class="custom-table text-light">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Attendance Status</th>
+                    <th>Faculty Marker</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td class="fw-bold">{{ r.student.roll_no if r.student else '' }}</td>
+                    <td>{{ r.student.full_name if r.student else '' }}</td>
+                    <td>{{ r.subject.name if r.subject else 'General Session' }}</td>
+                    <td><span class="badge-status {{ r.status|lower }}">{{ r.status }}</span></td>
+                    <td>{{ r.marked_by_faculty.full_name if r.marked_by_faculty else 'Admin' }}</td>
+                    <td class="text-muted small">{{ r.remarks or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No attendance entries recorded for selected date.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

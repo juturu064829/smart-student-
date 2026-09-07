@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if student else 'Add' }} Student - Smart Student Management System{% endblock %}
+{% block header_title %}{{ 'Edit' if student else 'Add' }} Student Record{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 max-width-900 mx-auto">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h4 class="fw-bold text-light mb-0">
+            <i class="fa-solid fa-user-pen me-2 text-primary"></i> {{ 'Edit' if student else 'Add New' }} Student Profile
+        </h4>
+        <a href="{{ url_for('student.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <form method="POST" action="{{ url_for('student.edit_student', student_id=student.id) if student else url_for('student.add_student') }}">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Student Roll Number</label>
+                <input type="text" name="roll_no" value="{{ student.roll_no if student else '' }}" class="form-control" placeholder="e.g. STU2025099" required {% if student %}readonly{% endif %}>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">First Name</label>
+                <input type="text" name="first_name" value="{{ student.first_name if student else '' }}" class="form-control" placeholder="John" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Last Name</label>
+                <input type="text" name="last_name" value="{{ student.last_name if student else '' }}" class="form-control" placeholder="Doe" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Gender</label>
+                <select name="gender" class="form-select">
+                    <option value="Male" {% if student and student.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if student and student.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if student and student.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Email Address</label>
+                <input type="email" name="email" value="{{ student.email if student else '' }}" class="form-control" placeholder="student@smartcollege.edu" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Phone Number</label>
+                <input type="text" name="phone" value="{{ student.phone if student else '' }}" class="form-control" placeholder="+91 9876543210">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label text-muted small fw-semibold">Department</label>
+                <select name="department_id" class="form-select" required>
+                    <option value="">-- Select Department --</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}" {% if student and student.department_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted small fw-semibold">Course Program</label>
+                <select name="course_id" class="form-select" required>
+                    <option value="">-- Select Course --</option>
+                    {% for c in courses %}
+                    <option value="{{ c.id }}" {% if student and student.course_id == c.id %}selected{% endif %}>{{ c.name }} ({{ c.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-semibold">Academic Year</label>
+                <select name="current_year" class="form-select">
+                    {% for y in range(1, 5) %}
+                    <option value="{{ y }}" {% if student and student.current_year == y %}selected{% endif %}>Year {{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-semibold">Current Semester</label>
+                <select name="current_semester" class="form-select">
+                    {% for s in range(1, 9) %}
+                    <option value="{{ s }}" {% if student and student.current_semester == s %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-semibold">Date of Birth</label>
+                <input type="date" name="dob" value="{{ student.dob.strftime('%Y-%m-%d') if student and student.dob else '' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-semibold">Blood Group</label>
+                <input type="text" name="blood_group" value="{{ student.blood_group if student else '' }}" class="form-control" placeholder="O+">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label text-muted small fw-semibold">Guardian Name</label>
+                <input type="text" name="guardian_name" value="{{ student.guardian_name if student else '' }}" class="form-control" placeholder="Guardian / Parent Name">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted small fw-semibold">Guardian Phone</label>
+                <input type="text" name="guardian_phone" value="{{ student.guardian_phone if student else '' }}" class="form-control" placeholder="Emergency Contact">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">City</label>
+                <input type="text" name="city" value="{{ student.city if student else '' }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">State</label>
+                <input type="text" name="state" value="{{ student.state if student else '' }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-semibold">Enrollment Status</label>
+                <select name="status" class="form-select">
+                    <option value="Active" {% if student and student.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Graduated" {% if student and student.status == 'Graduated' %}selected{% endif %}>Graduated</option>
+                    <option value="Suspended" {% if student and student.status == 'Suspended' %}selected{% endif %}>Suspended</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label text-muted small fw-semibold">Permanent Address</label>
+                <textarea name="address" class="form-control" rows="2" placeholder="Full Residential Address">{{ student.address if student else '' }}</textarea>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ url_for('student.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-save me-2"></i> {{ 'Save Changes' if student else 'Register Student' }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

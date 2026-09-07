@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - Smart Student Management System{% endblock %}
+{% block header_title %}Mark Bulk Attendance{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <h4 class="fw-bold text-light mb-3"><i class="fa-solid fa-clipboard-check me-2 text-primary"></i> Bulk Attendance Entry</h4>
+    
+    <!-- Course & Subject Selector -->
+    <form method="GET" action="{{ url_for('attendance.mark_attendance') }}" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label text-muted small fw-semibold">Select Course</label>
+            <select name="course_id" class="form-select" onchange="this.form.submit()" required>
+                <option value="">-- Choose Course Program --</option>
+                {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-muted small fw-semibold">Select Subject</label>
+            <select name="subject_id" class="form-select" onchange="this.form.submit()" required>
+                <option value="">-- Choose Subject --</option>
+                {% for s in subjects %}
+                <option value="{{ s.id }}" {% if selected_subject == s.id %}selected{% endif %}>{{ s.name }} ({{ s.code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-muted small fw-semibold">Session Date</label>
+            <input type="date" name="date" value="{{ selected_date.strftime('%Y-%m-%d') }}" class="form-control" onchange="this.form.submit()">
+        </div>
+    </form>
+</div>
+
+{% if students %}
+<div class="glass-panel p-4">
+    <form method="POST" action="{{ url_for('attendance.mark_attendance') }}">
+        <input type="hidden" name="course_id" value="{{ selected_course }}">
+        <input type="hidden" name="subject_id" value="{{ selected_subject }}">
+        <input type="hidden" name="date" value="{{ selected_date.strftime('%Y-%m-%d') }}">
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold text-light mb-0">Roster Student List ({{ students|length }} Students)</h5>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-success" onclick="markAll('Present')">Set All Present</button>
+                <button type="button" class="btn btn-outline-danger" onclick="markAll('Absent')">Set All Absent</button>
+            </div>
+        </div>
+
+        <div class="table-responsive mb-4">
+            <table class="custom-table text-light">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Status Selection</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stu in students %}
+                    <input type="hidden" name="student_ids" value="{{ stu.id }}">
+                    <tr>
+                        <td class="fw-bold">{{ stu.roll_no }}</td>
+                        <td>{{ stu.full_name }}</td>
+                        <td>
+                            {% set current_status = existing_map.get(stu.id, 'Present') %}
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check att-radio" name="status_{{ stu.id }}" id="pres_{{ stu.id }}" value="Present" {% if current_status == 'Present' %}checked{% endif %}>
+                                <label class="btn btn-sm btn-outline-success" for="pres_{{ stu.id }}">Present</label>
+
+                                <input type="radio" class="btn-check att-radio" name="status_{{ stu.id }}" id="abs_{{ stu.id }}" value="Absent" {% if current_status == 'Absent' %}checked{% endif %}>
+                                <label class="btn btn-sm btn-outline-danger" for="abs_{{ stu.id }}">Absent</label>
+
+                                <input type="radio" class="btn-check att-radio" name="status_{{ stu.id }}" id="late_{{ stu.id }}" value="Late" {% if current_status == 'Late' %}checked{% endif %}>
+                                <label class="btn btn-sm btn-outline-warning" for="late_{{ stu.id }}">Late</label>
+
+                                <input type="radio" class="btn-check att-radio" name="status_{{ stu.id }}" id="leave_{{ stu.id }}" value="Leave" {% if current_status == 'Leave' %}checked{% endif %}>
+                                <label class="btn btn-sm btn-outline-info" for="leave_{{ stu.id }}">Leave</label>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" name="remarks_{{ stu.id }}" class="form-control form-control-sm" placeholder="Optional notes">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+                <i class="fa-solid fa-save me-2"></i> Save Attendance Logs
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function markAll(status) {
+        document.querySelectorAll(`.att-radio[value="${status}"]`).forEach(radio => radio.checked = true);
+    }
+</script>
+{% endif %}
+{% endblock %}

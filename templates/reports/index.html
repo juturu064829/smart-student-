@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Report Hub - Smart Student Management System{% endblock %}
+{% block header_title %}Report Generation & Export Center{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-file-export me-2 text-primary"></i> Academic Report Hub</h4>
+    <p class="text-muted small mb-0">Generate and download official PDF documents and raw CSV data exports.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Student Directory Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-20 text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa-solid fa-user-graduate fa-xl"></i>
+                </div>
+                <h5 class="fw-bold text-light mb-2">Student Directory</h5>
+                <p class="text-muted small mb-3">Enrolled student roster, performance metrics, and risk statuses.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('report.export_students', fmt='csv') }}" class="btn btn-outline-success btn-sm flex-fill">
+                    <i class="fa-solid fa-file-csv me-1"></i> CSV
+                </a>
+                <a href="{{ url_for('report.export_students', fmt='pdf') }}" class="btn btn-primary btn-sm flex-fill">
+                    <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Roster Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-20 text-info rounded-circle mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa-solid fa-chalkboard-user fa-xl"></i>
+                </div>
+                <h5 class="fw-bold text-light mb-2">Faculty Roster</h5>
+                <p class="text-muted small mb-3">Academic staff list, qualifications, designations, and salary bands.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('report.export_faculty', fmt='csv') }}" class="btn btn-outline-success btn-sm flex-fill">
+                    <i class="fa-solid fa-file-csv me-1"></i> CSV
+                </a>
+                <a href="{{ url_for('report.export_faculty', fmt='pdf') }}" class="btn btn-info btn-sm text-dark flex-fill">
+                    <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Ledger Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-20 text-warning rounded-circle mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa-solid fa-receipt fa-xl"></i>
+                </div>
+                <h5 class="fw-bold text-light mb-2">Fee Ledger</h5>
+                <p class="text-muted small mb-3">Student tuition balances, fee breakdowns, and payment receipts.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('report.export_fees', fmt='csv') }}" class="btn btn-outline-success btn-sm flex-fill">
+                    <i class="fa-solid fa-file-csv me-1"></i> CSV
+                </a>
+                <a href="{{ url_for('report.export_fees', fmt='pdf') }}" class="btn btn-warning btn-sm text-dark flex-fill">
+                    <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payroll Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-20 text-success rounded-circle mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa-solid fa-money-bill-wave fa-xl"></i>
+                </div>
+                <h5 class="fw-bold text-light mb-2">Faculty Payroll</h5>
+                <p class="text-muted small mb-3">Faculty net salary calculations and monthly disbursement histories.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('report.export_salary', fmt='csv') }}" class="btn btn-outline-success btn-sm flex-fill">
+                    <i class="fa-solid fa-file-csv me-1"></i> CSV
+                </a>
+                <a href="{{ url_for('report.export_salary', fmt='pdf') }}" class="btn btn-success btn-sm flex-fill">
+                    <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

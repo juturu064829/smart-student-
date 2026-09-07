@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Enter Exam Marks - Smart Student Management System{% endblock %}
+{% block header_title %}Enter Student Marks{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <h4 class="fw-bold text-light mb-3"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i> Examination Marks Entry Form</h4>
+    
+    <form method="GET" action="{{ url_for('result.enter_marks') }}" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label text-muted small fw-semibold">Select Course Program</label>
+            <select name="course_id" class="form-select" onchange="this.form.submit()" required>
+                <option value="">-- Choose Course Program --</option>
+                {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label text-muted small fw-semibold">Select Target Subject</label>
+            <select name="subject_id" class="form-select" onchange="this.form.submit()" required>
+                <option value="">-- Choose Subject --</option>
+                {% for s in subjects %}
+                <option value="{{ s.id }}" {% if selected_subject == s.id %}selected{% endif %}>{{ s.name }} (Sem {{ s.semester }})</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+{% if students and subject_obj %}
+<div class="glass-panel p-4">
+    <form method="POST" action="{{ url_for('result.enter_marks') }}">
+        <input type="hidden" name="subject_id" value="{{ selected_subject }}">
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold text-light mb-0">Marks Roster: {{ subject_obj.name }} (Max 100 Marks)</h5>
+            <small class="text-muted">Internal: 20 | Assignment: 10 | Practical: 20 | External: 50</small>
+        </div>
+
+        <div class="table-responsive mb-4">
+            <table class="custom-table text-light">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th style="width: 110px;">Internal (20)</th>
+                        <th style="width: 110px;">Assignment (10)</th>
+                        <th style="width: 110px;">Practical (20)</th>
+                        <th style="width: 110px;">External (50)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stu in students %}
+                    <input type="hidden" name="student_ids" value="{{ stu.id }}">
+                    {% set ex_res = existing_results.get(stu.id) %}
+                    <tr>
+                        <td class="fw-bold">{{ stu.roll_no }}</td>
+                        <td>{{ stu.full_name }}</td>
+                        <td>
+                            <input type="number" step="0.5" min="0" max="20" name="internal_{{ stu.id }}" value="{{ ex_res.internal_marks if ex_res else 15.0 }}" class="form-control form-control-sm text-center">
+                        </td>
+                        <td>
+                            <input type="number" step="0.5" min="0" max="10" name="assignment_{{ stu.id }}" value="{{ ex_res.assignment_marks if ex_res else 8.0 }}" class="form-control form-control-sm text-center">
+                        </td>
+                        <td>
+                            <input type="number" step="0.5" min="0" max="20" name="practical_{{ stu.id }}" value="{{ ex_res.practical_marks if ex_res else 16.0 }}" class="form-control form-control-sm text-center">
+                        </td>
+                        <td>
+                            <input type="number" step="0.5" min="0" max="50" name="external_{{ stu.id }}" value="{{ ex_res.external_marks if ex_res else 35.0 }}" class="form-control form-control-sm text-center">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+                <i class="fa-solid fa-calculator me-2"></i> Process Marks & Calculate Grades
+            </button>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

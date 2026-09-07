@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Student Management System{% endblock %}
+{% block header_title %}Executive Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+            <h3 class="fw-bold text-light mb-1">Welcome back, {{ session.get('display_name') }}! 👋</h3>
+            <p class="text-muted mb-0 small">Smart Student Management System | Academic Year 2025-2026</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if session.get('user_role') in ['Admin', 'Faculty'] %}
+            <a href="{{ url_for('student.add_student') }}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus me-1"></i> Add Student
+            </a>
+            <a href="{{ url_for('attendance.mark_attendance') }}" class="btn btn-outline-info btn-sm">
+                <i class="fa-solid fa-clipboard-check me-1"></i> Mark Attendance
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards Grid (10 KPIs) -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-primary bg-opacity-20 text-primary">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <div class="kpi-val text-light">{{ total_students }}</div>
+            <div class="kpi-title">Total Students</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-info bg-opacity-20 text-info">
+                <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+            <div class="kpi-val text-light">{{ total_faculty }}</div>
+            <div class="kpi-title">Total Faculty</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-warning bg-opacity-20 text-warning">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div class="kpi-val text-light">{{ total_courses }}</div>
+            <div class="kpi-title">Active Courses</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-success bg-opacity-20 text-success">
+                <i class="fa-solid fa-sitemap"></i>
+            </div>
+            <div class="kpi-val text-light">{{ total_departments }}</div>
+            <div class="kpi-title">Departments</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-danger bg-opacity-20 text-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="kpi-val text-danger">{{ at_risk_count }}</div>
+            <div class="kpi-title">Students At Risk</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-success bg-opacity-20 text-success">
+                <i class="fa-solid fa-clipboard-user"></i>
+            </div>
+            <div class="kpi-val text-light">{{ today_att_pct }}%</div>
+            <div class="kpi-title">Overall Attendance</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-primary bg-opacity-20 text-primary">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="kpi-val text-light">{{ avg_student_pct }}%</div>
+            <div class="kpi-title">Avg Academic Score</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-warning bg-opacity-20 text-warning">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="kpi-val text-warning">${{ "{:,.0f}".format(total_pending_fees) }}</div>
+            <div class="kpi-title">Pending Fees</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-info bg-opacity-20 text-info">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <div class="kpi-val text-light">${{ "{:,.0f}".format(monthly_salary_total) }}</div>
+            <div class="kpi-title">Monthly Payroll</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2.4 col-lg-3">
+        <div class="glass-panel kpi-card">
+            <div class="kpi-icon bg-secondary bg-opacity-20 text-light">
+                <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <div class="kpi-val text-light">{{ announcements|length }}</div>
+            <div class="kpi-title">Active Notices</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="glass-panel p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-light"><i class="fa-solid fa-chart-column me-2 text-primary"></i> Student Enrollment by Department</h5>
+            </div>
+            <canvas id="deptEnrollmentChart" style="max-height: 280px;"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="glass-panel p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-light"><i class="fa-solid fa-chart-pie me-2 text-pink"></i> Gender Ratio</h5>
+            </div>
+            <canvas id="genderDistributionChart" style="max-height: 280px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Intelligent Risk Section: At-Risk Students -->
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h5 class="fw-bold text-danger mb-0">
+                <i class="fa-solid fa-shield-cat me-2"></i> Intelligent Performance Watchlist ("At Risk Students")
+            </h5>
+            <p class="text-muted small mb-0">Identified based on low attendance (< 75%) or low average marks (< 50%).</p>
+        </div>
+        <span class="badge bg-danger fs-6">{{ at_risk_students|length }} Flagged</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table text-light">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Attendance %</th>
+                    <th>Average Score %</th>
+                    <th>Risk Status</th>
+                    <th>Primary Concern</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r_stu in at_risk_students %}
+                <tr>
+                    <td class="fw-semibold">{{ r_stu.roll_no }}</td>
+                    <td>{{ r_stu.name }}</td>
+                    <td>{{ r_stu.department }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold text-{{ 'danger' if r_stu.attendance < 75 else 'success' }}">{{ r_stu.attendance }}%</span>
+                            <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-{{ 'danger' if r_stu.attendance < 75 else 'success' }}" style="width: {{ r_stu.attendance }}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="fw-bold text-{{ 'warning' if r_stu.average_marks < 50 else 'light' }}">{{ r_stu.average_marks }}%</td>
+                    <td>
+                        <span class="badge-status {{ r_stu.risk_level|lower|replace(' ', '-') }}">
+                            <i class="fa-solid fa-circle fa-xs"></i> {{ r_stu.risk_level }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ r_stu.reasons }}</td>
+                    <td>
+                        <a href="{{ url_for('student.view_student', student_id=r_stu.id) }}" class="btn btn-sm btn-outline-primary py-1 px-2">
+                            <i class="fa-solid fa-eye"></i> View Profile
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-3">
+                        <i class="fa-solid fa-circle-check text-success me-2"></i> Excellent! No students currently flagged for academic risk.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bottom Grid: Recent Students & Noticeboard -->
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold text-light mb-3"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i> Recently Enrolled Students</h5>
+            <div class="table-responsive">
+                <table class="custom-table text-light">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Course</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stu in recent_students %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ stu.roll_no }}</span></td>
+                            <td class="fw-semibold">{{ stu.full_name }}</td>
+                            <td>{{ stu.department.name if stu.department else '' }}</td>
+                            <td>{{ stu.course.code if stu.course else '' }}</td>
+                            <td>
+                                <a href="{{ url_for('student.view_student', student_id=stu.id) }}" class="btn btn-sm btn-outline-secondary py-1">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold text-light mb-3"><i class="fa-solid fa-bullhorn me-2 text-warning"></i> Campus Noticeboard</h5>
+            <div class="d-flex flex-column gap-3">
+                {% for ann in announcements %}
+                <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.03); border-left: 4px solid var(--{{ 'danger' if ann.priority == 'Urgent' else ('warning' if ann.priority == 'High' else 'primary') }});">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="badge bg-dark border border-secondary text-light">{{ ann.category }}</span>
+                        <small class="text-muted">{{ ann.created_at.strftime('%b %d, %Y') if ann.created_at else '' }}</small>
+                    </div>
+                    <h6 class="fw-bold text-light mb-1">{{ ann.title }}</h6>
+                    <p class="text-muted small mb-0">{{ ann.content[:120] }}...</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

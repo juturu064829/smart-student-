@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Exams & Results - Smart Student Management System{% endblock %}
+{% block header_title %}Examination Marks & Results{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+        <div>
+            <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-file-invoice me-2 text-warning"></i> Examination Results Ledger</h4>
+            <p class="text-muted small mb-0">Grade calculations, internal/external mark breakdowns, and semester GPAs.</p>
+        </div>
+        {% if session.get('user_role') in ['Admin', 'Faculty'] %}
+        <a href="{{ url_for('result.enter_marks') }}" class="btn btn-primary">
+            <i class="fa-solid fa-pen-to-square me-2"></i> Enter / Update Marks
+        </a>
+        {% endif %}
+    </div>
+
+    <form method="GET" action="{{ url_for('result.index') }}" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="q" value="{{ search_q }}" class="form-control" placeholder="Search Roll No or Student Name...">
+        </div>
+        <div class="col-md-4">
+            <select name="course_id" class="form-select">
+                <option value="">-- All Courses --</option>
+                {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-fill">Filter Results</button>
+            <a href="{{ url_for('result.index') }}" class="btn btn-outline-secondary"><i class="fa-solid fa-rotate-left"></i></a>
+        </div>
+    </form>
+</div>
+
+<div class="glass-panel p-4">
+    <div class="table-responsive">
+        <table class="custom-table text-light">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Internal (20)</th>
+                    <th>Assign (10)</th>
+                    <th>Prac (20)</th>
+                    <th>Ext (50)</th>
+                    <th>Total Marks</th>
+                    <th>% Score</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for res in results %}
+                <tr>
+                    <td class="fw-bold"><span class="badge bg-dark border border-secondary">{{ res.student.roll_no if res.student else '' }}</span></td>
+                    <td class="fw-semibold">{{ res.student.full_name if res.student else '' }}</td>
+                    <td>{{ res.subject.name if res.subject else '' }}</td>
+                    <td>{{ res.internal_marks }}</td>
+                    <td>{{ res.assignment_marks }}</td>
+                    <td>{{ res.practical_marks }}</td>
+                    <td>{{ res.external_marks }}</td>
+                    <td class="fw-bold text-primary">{{ res.total_marks }}</td>
+                    <td class="fw-bold">{{ res.percentage }}%</td>
+                    <td><span class="badge bg-info text-dark fw-bold fs-6">{{ res.grade }}</span></td>
+                    <td><span class="badge-status {{ res.result_status|lower }}">{{ res.result_status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="11" class="text-center text-muted py-4">No exam results recorded for selected filters.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

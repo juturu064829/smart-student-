@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Payroll - Smart Student Management System{% endblock %}
+{% block header_title %}Faculty Salary Payroll{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+        <div>
+            <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-money-bill-wave me-2 text-success"></i> Faculty Payroll & Disbursements</h4>
+            <p class="text-muted small mb-0">Automatic Net Salary calculations: <code>Basic + Allowances + Bonus - Deductions</code>.</p>
+        </div>
+        {% if session.get('user_role') == 'Admin' %}
+        <form action="{{ url_for('salary.generate_monthly_payroll') }}" method="POST" class="d-inline">
+            <input type="hidden" name="month" value="September">
+            <input type="hidden" name="year" value="2026">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-gears me-2"></i> Generate September 2026 Payroll
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="p-3 rounded-3 glass-panel border-info">
+                <div class="text-muted small">Total Monthly Payout</div>
+                <div class="fs-4 fw-bold text-info">${{ "{:,.2f}".format(total_payout) }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 rounded-3 glass-panel border-success">
+                <div class="text-muted small">Total Disbursed (Paid)</div>
+                <div class="fs-4 fw-bold text-success">${{ "{:,.2f}".format(total_paid) }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 rounded-3 glass-panel border-warning">
+                <div class="text-muted small">Pending Disbursal</div>
+                <div class="fs-4 fw-bold text-warning">${{ "{:,.2f}".format(total_pending) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-panel p-4">
+    <div class="table-responsive">
+        <table class="custom-table text-light">
+            <thead>
+                <tr>
+                    <th>Emp ID</th>
+                    <th>Faculty Name</th>
+                    <th>Department</th>
+                    <th>Basic ($)</th>
+                    <th>Allowances ($)</th>
+                    <th>Bonus ($)</th>
+                    <th>Deductions ($)</th>
+                    <th>Net Salary ($)</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sal in salaries %}
+                <tr>
+                    <td class="fw-bold"><span class="badge bg-dark border border-secondary">{{ sal.faculty.emp_id if sal.faculty else '' }}</span></td>
+                    <td class="fw-semibold">{{ sal.faculty.full_name if sal.faculty else '' }}</td>
+                    <td>{{ sal.faculty.department.name if sal.faculty and sal.faculty.department else '' }}</td>
+                    <td>${{ "{:,.2f}".format(sal.basic_salary) }}</td>
+                    <td>+${{ "{:,.2f}".format(sal.allowances) }}</td>
+                    <td>+${{ "{:,.2f}".format(sal.bonus) }}</td>
+                    <td class="text-danger">-${{ "{:,.2f}".format(sal.deductions) }}</td>
+                    <td class="fw-bold text-success fs-6">${{ "{:,.2f}".format(sal.net_salary) }}</td>
+                    <td><span class="badge-status {{ sal.payment_status|lower }}">{{ sal.payment_status }}</span></td>
+                    <td class="text-end">
+                        {% if sal.payment_status == 'Pending' and session.get('user_role') == 'Admin' %}
+                        <form action="{{ url_for('salary.process_salary', salary_id=sal.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                <i class="fa-solid fa-paper-plane me-1"></i> Disburse
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="10" class="text-center text-muted py-4">No salary records found for selected period.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
