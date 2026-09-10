@@ -119,7 +119,14 @@ def run_streamlit_app():
                 LEFT JOIN students s ON d.id = s.department_id 
                 GROUP BY d.id
             """, conn)
-            fig1 = px.bar(df_dept_stu, x="Department", y="StudentCount", color="Department", text_auto=True, color_discrete_sequence=px.colors.qualitative.Indigo)
+            fig1 = px.bar(
+                df_dept_stu,
+                x="Department",
+                y="StudentCount",
+                color="Department",
+                text_auto=True,
+                color_discrete_sequence=['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
+            )
             fig1.update_layout(template="plotly_dark", showlegend=False)
             st.plotly_chart(fig1, use_container_width=True)
 
