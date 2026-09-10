@@ -67,7 +67,8 @@ def run_streamlit_app():
 
     menu = st.sidebar.radio(
         "Select Analytics View",
-        ["Executive Overview", "Student Demographics", "Attendance Analytics", "Exam & Performance", "Faculty & Payroll", "Financial Fees"]
+        ["Executive Overview", "Student Demographics", "Attendance Analytics", "Exam & Performance", "Faculty & Payroll", "Financial Fees"],
+        key="main_analytics_view_radio"
     )
 
     # Load Departments & Courses for filters
@@ -82,8 +83,8 @@ def run_streamlit_app():
         dept_options = ["All"]
         course_options = ["All"]
 
-    selected_dept_code = st.sidebar.selectbox("Filter Department", dept_options)
-    selected_course_code = st.sidebar.selectbox("Filter Course", course_options)
+    selected_dept_code = st.sidebar.selectbox("Filter Department", dept_options, key="filter_dept_selectbox")
+    selected_course_code = st.sidebar.selectbox("Filter Course", course_options, key="filter_course_selectbox")
 
     st.sidebar.markdown("---")
     st.sidebar.info("💡 Connected directly to SQLite Database (`smart_sms.db`).")
