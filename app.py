@@ -78,9 +78,9 @@ def create_app(config_class=Config):
 
 app = create_app()
 
-# Handle Streamlit Cloud execution if app.py is run directly by Streamlit
+# Handle Streamlit Cloud execution if app.py is executed by Streamlit runtime
 if is_running_under_streamlit():
-    from streamlit_app.app import run_streamlit_app
+    from streamlit_app import run_streamlit_app
     run_streamlit_app()
 elif __name__ == '__main__':
     # Initialize DB tables if they don't exist
