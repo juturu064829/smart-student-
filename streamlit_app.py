@@ -13,8 +13,8 @@ if BASE_DIR not in sys.path:
 
 DB_PATH = os.path.join(BASE_DIR, 'smart_sms.db')
 
-def init_db_if_needed():
-    need_seed = False
+def init_db_if_needed(force_seed=False):
+    need_seed = force_seed
     if not os.path.exists(DB_PATH):
         need_seed = True
     else:
@@ -33,8 +33,11 @@ def init_db_if_needed():
         try:
             from database.seed_data import seed_database
             seed_database()
+            return True
         except Exception as e:
             st.warning(f"Note: Database auto-seed attempt: {e}")
+            return False
+    return False
 
 def get_connection():
     init_db_if_needed()
@@ -43,7 +46,7 @@ def get_connection():
 def run_streamlit_app():
     # Page Configuration
     st.set_page_config(
-        page_title="Smart SMS - Streamlit Analytics Dashboard",
+        page_title="Smart SMS - Streamlit Analytics & Database Portal",
         page_icon="🎓",
         layout="wide",
         initial_sidebar_state="expanded"
@@ -67,7 +70,15 @@ def run_streamlit_app():
 
     menu = st.sidebar.radio(
         "Select Analytics View",
-        ["Executive Overview", "Student Demographics", "Attendance Analytics", "Exam & Performance", "Faculty & Payroll", "Financial Fees"],
+        [
+            "Executive Overview", 
+            "Student Demographics", 
+            "Attendance Analytics", 
+            "Exam & Performance", 
+            "Faculty & Payroll", 
+            "Financial Fees",
+            "Database Explorer & Manager"
+        ],
         key="main_analytics_view_radio"
     )
 
@@ -87,7 +98,7 @@ def run_streamlit_app():
     selected_course_code = st.sidebar.selectbox("Filter Course", course_options, key="filter_course_selectbox")
 
     st.sidebar.markdown("---")
-    st.sidebar.info("💡 Connected directly to SQLite Database (`smart_sms.db`).")
+    st.sidebar.caption(f"💾 Connected to SQLite Database: `{os.path.basename(DB_PATH)}`")
 
     # ----------------------------------------------------
     # 1. EXECUTIVE OVERVIEW
@@ -271,6 +282,81 @@ def run_streamlit_app():
             p_fig = px.bar(pending_dept_df, x="department", y="pending_amount", color="department", text_auto=True)
             p_fig.update_layout(template="plotly_dark")
             st.plotly_chart(p_fig, use_container_width=True)
+
+    # ----------------------------------------------------
+    # 7. DATABASE EXPLORER & MANAGEMENT
+    # ----------------------------------------------------
+    elif menu == "Database Explorer & Manager":
+        st.title("🗄️ Database Explorer & Live Manager")
+        st.markdown("Direct interactive access to all SQLite relational tables, record inspection, and database management tools.")
+
+        # Table statistics
+        tables = [
+            "students", "faculty", "departments", "courses", 
+            "subjects", "attendance", "results", "fees", 
+            "salaries", "timetables", "announcements", "users"
+        ]
+
+        table_counts = {}
+        for t in tables:
+            try:
+                table_counts[t] = pd.read_sql_query(f"SELECT COUNT(*) as c FROM {t}", conn).iloc[0, 0]
+            except Exception:
+                table_counts[t] = 0
+
+        # KPI row for key tables
+        kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
+        kpi_col1.metric("Students in DB", f"{table_counts.get('students', 0)}")
+        kpi_col2.metric("Faculty in DB", f"{table_counts.get('faculty', 0)}")
+        kpi_col3.metric("Attendance Records", f"{table_counts.get('attendance', 0):,}")
+        kpi_col4.metric("Exam Results in DB", f"{table_counts.get('results', 0):,}")
+
+        st.markdown("---")
+
+        col_left, col_right = st.columns([2, 1])
+
+        with col_left:
+            selected_table = st.selectbox("📂 Choose Database Table to Inspect", tables, key="select_db_table")
+            df_table = pd.read_sql_query(f"SELECT * FROM {selected_table}", conn)
+            st.markdown(f"Showing **{len(df_table)} records** from `{selected_table}`:")
+            st.dataframe(df_table, use_container_width=True)
+
+            # CSV Download
+            csv_data = df_table.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                f"📥 Download {selected_table}.csv",
+                data=csv_data,
+                file_name=f"{selected_table}_export.csv",
+                mime="text/csv",
+                key="download_csv_btn"
+            )
+
+        with col_right:
+            st.subheader("⚡ Database Actions")
+            st.info("You can populate or refresh the demo database with 100+ students, faculty, and academic records.")
+            
+            if st.button("🔄 Re-Seed & Initialize Database", key="btn_reseed_db", type="primary"):
+                with st.spinner("Generating database records..."):
+                    try:
+                        from database.seed_data import seed_database
+                        seed_database()
+                        st.success("✅ Database successfully re-seeded with 105 students, 20 faculty, departments, and logs!")
+                        st.rerun()
+                    except Exception as err:
+                        st.error(f"Error seeding database: {err}")
+
+            st.markdown("---")
+            st.subheader("🔍 Custom SQL Query")
+            sql_query = st.text_area("Run read-only SELECT query", "SELECT * FROM students LIMIT 5", key="custom_sql_input")
+            if st.button("Run Query", key="btn_run_sql"):
+                if sql_query.strip().upper().startswith("SELECT"):
+                    try:
+                        res_df = pd.read_sql_query(sql_query, conn)
+                        st.dataframe(res_df, use_container_width=True)
+                    except Exception as q_err:
+                        st.error(f"SQL Error: {q_err}")
+                else:
+                    st.warning("Only SELECT queries are permitted in web explorer.")
 
     conn.close()
 

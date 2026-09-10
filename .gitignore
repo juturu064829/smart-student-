@@ -61,9 +61,9 @@ env.bak/
 venv.bak/
 
 # Database files (local dev SQLite)
-*.db
 *.sqlite3
 *.sqlite
+!smart_sms.db
 
 # Uploads & Media
 static/uploads/*
