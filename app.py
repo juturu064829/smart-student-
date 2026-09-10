@@ -1,7 +1,23 @@
 import os
+import sys
 from flask import Flask, render_template
 from config import Config
 from models import db
+
+def is_running_under_streamlit():
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if get_script_run_ctx() is not None:
+            return True
+    except Exception:
+        pass
+    try:
+        import streamlit as st
+        if getattr(st, "_is_running_with_streamlit", False):
+            return True
+    except Exception:
+        pass
+    return False
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -62,8 +78,25 @@ def create_app(config_class=Config):
 
 app = create_app()
 
-if __name__ == '__main__':
+# Handle Streamlit Cloud execution if app.py is run directly by Streamlit
+if is_running_under_streamlit():
+    from streamlit_app.app import run_streamlit_app
+    run_streamlit_app()
+elif __name__ == '__main__':
+    # Initialize DB tables if they don't exist
     with app.app_context():
         db.create_all()
-    print("Starting Smart Student Management System on http://127.0.0.1:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+        # Auto seed if empty
+        from models import Student
+        if Student.query.count() == 0:
+            try:
+                from database.seed_data import seed_database
+                seed_database()
+            except Exception as e:
+                print(f"Auto-seeding note: {e}")
+
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1')
+    print(f"Starting Smart Student Management System on http://0.0.0.0:{port}")
+    # use_reloader=False prevents Werkzeug signal handler crashes across threads and platforms
+    app.run(host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False)
