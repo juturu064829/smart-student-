@@ -103,8 +103,11 @@ def index():
         student_specific_data=student_specific_data
     )
 
+from utils.cache import cached
+
 @dashboard_bp.route('/api/dashboard-charts')
 @login_required
+@cached(ttl=60, prefix='dashboard_charts')
 def dashboard_charts_api():
     # 1. Dept wise student count
     depts = Department.query.all()

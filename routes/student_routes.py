@@ -136,6 +136,9 @@ def add_student():
         db.session.add(initial_fee)
 
         db.session.commit()
+        from utils.cache import invalidate_cache
+        invalidate_cache('dashboard')
+        invalidate_cache('departments')
 
         flash(f'Student {student.full_name} added successfully! Login credentials generated (Password: student123).', 'success')
         return redirect(url_for('student.view_student', student_id=student.id))
@@ -185,6 +188,9 @@ def edit_student(student_id):
             student.dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
 
         db.session.commit()
+        from utils.cache import invalidate_cache
+        invalidate_cache('dashboard')
+        invalidate_cache('departments')
         flash(f'Student profile for {student.full_name} updated successfully!', 'success')
         return redirect(url_for('student.view_student', student_id=student.id))
 
@@ -199,5 +205,8 @@ def delete_student(student_id):
     name = student.full_name
     db.session.delete(student)
     db.session.commit()
+    from utils.cache import invalidate_cache
+    invalidate_cache('dashboard')
+    invalidate_cache('departments')
     flash(f'Student {name} deleted successfully.', 'info')
     return redirect(url_for('student.index'))

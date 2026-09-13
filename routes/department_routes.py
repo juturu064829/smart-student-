@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Department
 from utils.decorators import login_required, admin_required
+from utils.cache import invalidate_cache
 
 department_bp = Blueprint('department', __name__, url_prefix='/departments')
 
@@ -35,6 +36,9 @@ def add_department():
     )
     db.session.add(dept)
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_departments')
+    invalidate_cache('dashboard')
     flash(f'Department {name} added successfully!', 'success')
     return redirect(url_for('department.index'))
 
@@ -50,6 +54,9 @@ def edit_department(dept_id):
     dept.status = request.form.get('status', 'Active')
 
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_departments')
+    invalidate_cache('dashboard')
     flash(f'Department {dept.name} updated successfully!', 'success')
     return redirect(url_for('department.index'))
 
@@ -60,5 +67,8 @@ def delete_department(dept_id):
     name = dept.name
     db.session.delete(dept)
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_departments')
+    invalidate_cache('dashboard')
     flash(f'Department {name} deleted successfully.', 'info')
     return redirect(url_for('department.index'))

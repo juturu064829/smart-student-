@@ -1,6 +1,7 @@
 import os
 import sys
-from flask import Flask, render_template
+import time
+from flask import Flask, render_template, request, url_for
 from config import Config
 from models import db
 
@@ -59,6 +60,47 @@ def create_app(config_class=Config):
     app.register_blueprint(announcement_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(api_bp)
+
+    # Cache-Busting Static Asset Helper
+    # Generates versioned URLs (e.g., /static/css/style.css?v=1726180000) based on file modification timestamp
+    @app.context_processor
+    def inject_static_version():
+        def static_version(filename):
+            try:
+                filepath = os.path.join(app.static_folder, filename)
+                if os.path.exists(filepath):
+                    version = int(os.path.getmtime(filepath))
+                else:
+                    version = app.config.get('APP_VERSION', '1.0')
+            except Exception:
+                version = app.config.get('APP_VERSION', '1.0')
+            return f"{url_for('static', filename=filename)}?v={version}"
+        return dict(static_version=static_version)
+
+    # HTTP Cache-Control Middleware
+    @app.after_request
+    def set_cache_headers(response):
+        path = request.path
+
+        # 1. Static Assets (CSS, JS, Images, Fonts) -> Aggressive caching (30 days) with cache-busting
+        if path.startswith('/static/'):
+            max_age = app.config.get('STATIC_CACHE_MAX_AGE', 2592000)
+            response.headers['Cache-Control'] = f'public, max-age={max_age}, immutable'
+            response.headers['Vary'] = 'Accept-Encoding'
+
+        # 2. Public Read-Only API Endpoints -> Short cache duration (60s)
+        elif path in ['/api/v1/departments', '/api/v1/courses', '/api/dashboard-charts']:
+            ttl = app.config.get('DEFAULT_API_CACHE_TTL', 60)
+            response.headers['Cache-Control'] = f'public, max-age={ttl}'
+            response.headers['Vary'] = 'Accept-Encoding, Cookie'
+
+        # 3. Dynamic, Authenticated & Sensitive HTML/API Endpoints -> Never cache in browser history
+        else:
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+
+        return response
 
     # Custom Error Handlers
     @app.errorhandler(404)

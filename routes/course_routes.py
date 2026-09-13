@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Course, Department, Subject, Faculty
 from utils.decorators import login_required, admin_required
+from utils.cache import invalidate_cache
 
 course_bp = Blueprint('course', __name__, url_prefix='/courses')
 
@@ -41,6 +42,9 @@ def add_course():
     )
     db.session.add(course)
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_courses')
+    invalidate_cache('dashboard')
     flash(f'Course {name} added successfully!', 'success')
     return redirect(url_for('course.index'))
 
@@ -77,6 +81,9 @@ def add_subject(course_id):
     )
     db.session.add(subj)
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_courses')
+    invalidate_cache('dashboard')
     flash(f'Subject {name} added to {course.name}!', 'success')
     return redirect(url_for('course.course_subjects', course_id=course_id))
 
@@ -87,5 +94,8 @@ def delete_course(course_id):
     name = course.name
     db.session.delete(course)
     db.session.commit()
+    # Invalidate cache
+    invalidate_cache('api_courses')
+    invalidate_cache('dashboard')
     flash(f'Course {name} deleted successfully.', 'info')
     return redirect(url_for('course.index'))

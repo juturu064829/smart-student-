@@ -18,3 +18,9 @@ class Config:
     # Academic Configuration
     ATTENDANCE_WARNING_THRESHOLD = 75.0  # Percentage below which attendance triggers a warning
     FAILING_GRADE_THRESHOLD = 50.0       # Average marks below which triggers academic risk
+
+    # Caching Configuration
+    CACHE_ENABLED = os.environ.get('CACHE_ENABLED', 'True').lower() in ('true', '1')
+    STATIC_CACHE_MAX_AGE = int(os.environ.get('STATIC_CACHE_MAX_AGE', 2592000))  # 30 days in seconds
+    DEFAULT_API_CACHE_TTL = int(os.environ.get('DEFAULT_API_CACHE_TTL', 60))    # 60 seconds TTL
+    APP_VERSION = os.environ.get('APP_VERSION', '1.2.0')

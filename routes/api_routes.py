@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from models import db, Student, Faculty, Department, Course, Attendance, Result, Fee, Salary
 from utils.decorators import login_required
+from utils.cache import cached, invalidate_cache
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -48,6 +49,9 @@ def create_student_api():
     )
     db.session.add(student)
     db.session.commit()
+    # Invalidate dashboard and department counts cache
+    invalidate_cache('dashboard')
+    invalidate_cache('departments')
     return jsonify({'status': 'success', 'message': 'Student created', 'data': student.to_dict()}), 201
 
 @api_bp.route('/students/<int:student_id>', methods=['PUT'])
@@ -60,6 +64,8 @@ def update_student_api(student_id):
             setattr(student, key, value)
 
     db.session.commit()
+    invalidate_cache('dashboard')
+    invalidate_cache('departments')
     return jsonify({'status': 'success', 'message': 'Student updated', 'data': student.to_dict()})
 
 @api_bp.route('/students/<int:student_id>', methods=['DELETE'])
@@ -67,6 +73,8 @@ def delete_student_api(student_id):
     student = Student.query.get_or_404(student_id)
     db.session.delete(student)
     db.session.commit()
+    invalidate_cache('dashboard')
+    invalidate_cache('departments')
     return jsonify({'status': 'success', 'message': f'Student ID {student_id} deleted'})
 
 # --- FACULTY APIs ---
@@ -80,13 +88,15 @@ def get_faculty_by_id(faculty_id):
     fac = Faculty.query.get_or_404(faculty_id)
     return jsonify({'status': 'success', 'data': fac.to_dict()})
 
-# --- DEPARTMENTS & COURSES APIs ---
+# --- DEPARTMENTS & COURSES APIs (Cached for performance) ---
 @api_bp.route('/departments', methods=['GET'])
+@cached(ttl=60, prefix='api_departments')
 def get_departments():
     depts = Department.query.all()
     return jsonify({'status': 'success', 'count': len(depts), 'data': [d.to_dict() for d in depts]})
 
 @api_bp.route('/courses', methods=['GET'])
+@cached(ttl=60, prefix='api_courses')
 def get_courses():
     courses = Course.query.all()
     return jsonify({'status': 'success', 'count': len(courses), 'data': [c.to_dict() for c in courses]})
