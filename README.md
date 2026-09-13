@@ -1,115 +1,87 @@
-# Smart Student Management System
+# 🎓 Smart Student Management System
 
 A full-stack, intelligent **Smart Student Management System** built using Python, Flask, SQLAlchemy ORM, Streamlit, HTML5, CSS3, JavaScript (Bootstrap 5 + glassmorphism theme), and REST APIs.
 
 ---
 
-## 🚀 Features
+## 🌐 Application URLs
 
-* **Role-Based Authentication**: Secure accounts for Admin, Faculty, and Student roles with password hashing (`Werkzeug`) and session protection.
-* **Executive Dashboard**: 10 live KPI cards, interactive Chart.js visualizations, recent activity feeds, and noticeboard announcements.
-* **Intelligent Performance Watchlist ("At-Risk Students")**: Automatically flags students with low attendance (< 75%) or failing grades (< 50%).
-* **Student & Faculty Management**: Full CRUD operations, filtering by Department, Course, Year, Semester, and detailed tabbed profiles.
-* **Attendance Management**: Bulk attendance marking, date-wise logs, progress bars, and attendance warnings.
-* **Exams & Grading System**: Automatic score calculation, percentage grading (A+, A, B+, B, C, D, F), GPA computation, and marksheets.
-* **Fees Ledger & Faculty Payroll**: Tuition, hostel fee ledgers with receipt tracking; Faculty payroll generation (`Basic + Allowances + Bonus - Deductions`).
-* **Streamlit Analytics Dashboard**: Standalone Streamlit application providing interactive Plotly charts and cross-departmental filterable insights.
-* **Reporting Hub**: Export CSV and ReportLab PDF reports for all major modules.
-* **REST APIs**: Full RESTful JSON endpoints (`/api/v1/...`).
+| Portal | Local URL | Description |
+| :--- | :--- | :--- |
+| **Main Web Portal** | [http://localhost:5000](http://localhost:5000) | Full college management system & executive dashboard |
+| **Login Page** | [http://localhost:5000/login](http://localhost:5000/login) | Multi-credential login (User ID / Email / Username) |
+| **Sign Up / Register** | [http://localhost:5000/register](http://localhost:5000/register) | Account registration with auto User ID allocation |
+| **User Profile** | [http://localhost:5000/profile](http://localhost:5000/profile) | View permanent User ID, update details, change password |
+| **Analytics Dashboard** | [http://localhost:8501](http://localhost:8501) | Streamlit & Plotly analytics with SQLite Database Explorer |
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Key Features
 
-* **Backend**: Python 3.14, Flask 3.1.3, Flask-SQLAlchemy 3.1.1
-* **Database**: SQLite (default local development) / MySQL compatible via SQLAlchemy ORM
-* **Analytics**: Streamlit 1.61.1, Plotly 6.9, Pandas 2.1
-* **PDF Reports**: ReportLab 5.0
-* **Frontend**: HTML5, CSS3 (Glassmorphic Theme + Dark/Light Mode), JavaScript, Bootstrap 5.3, FontAwesome 6, Chart.js
-
----
-
-## 📁 Directory Structure
-
-```text
-smart_student_management_system/
-├── app.py                     # Flask application entry point
-├── config.py                  # Database & App configurations
-├── requirements.txt           # Python dependencies
-├── README.md                  # System documentation
-├── .env.example               # Environment variable sample
-├── models/                    # SQLAlchemy ORM Models
-│   ├── user.py
-│   ├── department.py
-│   ├── course.py
-│   ├── subject.py
-│   ├── faculty.py
-│   ├── student.py
-│   ├── attendance.py
-│   ├── result.py
-│   ├── fee.py
-│   ├── salary.py
-│   ├── timetable.py
-│   ├── announcement.py
-│   └── notification.py
-├── routes/                    # Flask Blueprints
-│   ├── auth_routes.py
-│   ├── dashboard_routes.py
-│   ├── student_routes.py
-│   ├── faculty_routes.py
-│   ├── department_routes.py
-│   ├── course_routes.py
-│   ├── attendance_routes.py
-│   ├── result_routes.py
-│   ├── fee_routes.py
-│   ├── salary_routes.py
-│   ├── timetable_routes.py
-│   ├── announcement_routes.py
-│   ├── report_routes.py
-│   └── api_routes.py
-├── utils/                     # Business Logic & Helpers
-│   ├── decorators.py
-│   ├── calculations.py
-│   └── report_generator.py
-├── database/
-│   └── seed_data.py           # Database seeder script
-├── streamlit_app/
-│   └── app.py                 # Streamlit analytics dashboard
-├── static/
-│   ├── css/style.css
-│   └── js/main.js
-├── templates/                 # Jinja2 HTML templates
-└── tests/
-    └── test_app.py            # Unit test suite
-```
+* **User ID System (`USER-XXXXX`)**: Every user account receives a permanent, sequential unique User ID (e.g., `USER-10001`, `USER-10002`). Users can log in using **User ID**, **Email**, or **Username**.
+* **Account Registration**: Self-registration for students and faculty with instant User ID generation and password encryption.
+* **Role-Based Access Control**: Granular permissions across Admin, Faculty, and Student roles with secure session handling and `@login_required` decorators.
+* **Executive Dashboard**: 10 live KPI cards, interactive Chart.js visualizations, real-time alerts, and campus noticeboard.
+* **Intelligent At-Risk Watchlist**: Automatically detects students with attendance below 75% or failing marks below 50%.
+* **Student & Faculty Management**: Full CRUD operations with department filtering and detailed tabbed profiles.
+* **Bulk Attendance**: Date-wise attendance marking, monthly summaries, and low-attendance warnings.
+* **Exams & Auto-Grading**: Subject-wise mark calculation, percentage grading (A+, A, B+, B, C, D, F), GPA computation, and marksheets.
+* **Fees & Payroll**: Student fee ledgers with receipt tracking; Faculty payroll calculation (`Basic + Allowances + Bonus - Deductions`).
+* **High-Performance Caching System**: Thread-safe in-memory cache, browser `Cache-Control` headers, and automatic asset cache-busting versioning.
+* **Streamlit Executive Analytics & Database Explorer**: Live Plotly charts, demographic breakdowns, and interactive SQLite table browser with 1-click CSV exports.
+* **Report Generation**: 1-click CSV and ReportLab PDF document exports across all modules.
 
 ---
 
 ## 🔑 Demo Login Credentials
 
-| Role | Username | Password |
-| :--- | :--- | :--- |
-| **Admin** | `admin` | `admin123` |
-| **Faculty** | `faculty1` (to `faculty20`) | `faculty123` |
-| **Student** | `student1` (to `student105`) | `student123` |
+You can log in using **User ID**, **Username**, or **Email**:
+
+| Role | User ID | Username | Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Admin** | `USER-10001` | `admin` | `admin@smartcollege.edu` | `admin123` | Full access to all modules, settings & payroll |
+| **Faculty** | `USER-10002` *(to `USER-10021`)* | `faculty1` | `faculty1@smartcollege.edu` | `faculty123` | Mark attendance, enter exam marks, view classes |
+| **Student** | `USER-10022` *(to `USER-10126`)* | `student1` | `student1@smartcollege.edu` | `student123` | Personal profile, attendance, results & fee ledger |
 
 ---
 
-## 🏃 Running the Application
+## 🛠️ Technology Stack
 
-### 1. Database Seeding (First Time Setup)
+* **Backend**: Python 3.14, Flask 3.1.3, Flask-SQLAlchemy 3.1.1, Gunicorn 21.2
+* **Database**: SQLite (pre-seeded with 105+ students, 20 faculty) / MySQL compatible
+* **Analytics**: Streamlit 1.61.1, Plotly 6.9, Pandas 2.1
+* **PDF Engine**: ReportLab 5.0
+* **Frontend**: HTML5, CSS3 (Glassmorphic Dark Theme), JavaScript, Bootstrap 5.3, FontAwesome 6, Chart.js
+
+---
+
+## 🏃 Quick Start & Local Execution
+
+### 1. Install Dependencies
+```bash
+py -m pip install -r requirements.txt
+```
+
+### 2. Seed Database (Optional - Database is pre-seeded)
 ```bash
 py database/seed_data.py
 ```
 
-### 2. Flask Web Application
+### 3. Start Flask Web Server
 ```bash
 py app.py
 ```
 Open [http://localhost:5000](http://localhost:5000)
 
-### 3. Streamlit Analytics Dashboard
+### 4. Start Streamlit Analytics Portal
 ```bash
-streamlit run streamlit_app/app.py
+py -m streamlit run streamlit_app.py
 ```
 Open [http://localhost:8501](http://localhost:8501)
+
+---
+
+## ☁️ Deployment
+
+* **Streamlit Community Cloud**: Connect repo `juturu064829/smart-student-` with main file `streamlit_app.py`.
+* **Render.com / Railway**: Connect repo `juturu064829/smart-student-` with build command `pip install -r requirements.txt` and start command `gunicorn app:app`.
