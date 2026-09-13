@@ -21,7 +21,7 @@
         }
         .login-card {
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             padding: 2.5rem;
         }
         .toggle-password-btn {
@@ -67,18 +67,18 @@
 
         <!-- Login Form -->
         <form id="loginForm" action="{{ url_for('auth.login') }}" method="POST" novalidate onsubmit="return validateLoginForm(event)">
-            <!-- Username / Email Field -->
+            <!-- User ID / Username / Email Field -->
             <div class="mb-3">
-                <label for="username_input" class="form-label text-muted small fw-semibold">Username or Email Address</label>
+                <label for="username_input" class="form-label text-muted small fw-semibold">User ID, Username or Email</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-user"></i></span>
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-id-card-clip"></i></span>
                     <input 
                         type="text" 
                         id="username_input" 
                         name="username" 
                         value="{{ username or '' }}"
                         class="form-control" 
-                        placeholder="e.g. admin or student1@smartcollege.edu" 
+                        placeholder="USER-10001 / admin / student1@smartcollege.edu" 
                         required 
                         autofocus
                     >
@@ -115,8 +115,21 @@
                 </div>
             </div>
 
+            <!-- Remember Me & Signup Link Row -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe">
+                    <label class="form-check-label text-muted small" for="rememberMe">
+                        Remember Me
+                    </label>
+                </div>
+                <a href="{{ url_for('auth.register') }}" class="text-primary small text-decoration-none fw-semibold">
+                    <i class="fa-solid fa-user-plus me-1"></i> Create Account
+                </a>
+            </div>
+
             <!-- Proceed Submit Button -->
-            <button type="submit" id="proceedBtn" class="btn btn-primary w-100 py-2 fw-semibold mb-4 mt-2">
+            <button type="submit" id="proceedBtn" class="btn btn-primary w-100 py-2 fw-semibold mb-4">
                 <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Proceed
             </button>
 
@@ -124,13 +137,13 @@
             <div class="border-top border-secondary pt-3">
                 <p class="text-center text-muted small mb-2">Quick Demo Account Switcher:</p>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-info flex-fill" onclick="fillCreds('admin', 'admin123')">
+                    <button type="button" class="btn btn-sm btn-outline-info flex-fill" onclick="fillCreds('USER-10001', 'admin123')">
                         <i class="fa-solid fa-user-shield me-1"></i> Admin
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="fillCreds('faculty1', 'faculty123')">
+                    <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="fillCreds('USER-10002', 'faculty123')">
                         <i class="fa-solid fa-chalkboard-user me-1"></i> Faculty
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-success flex-fill" onclick="fillCreds('student1', 'student123')">
+                    <button type="button" class="btn btn-sm btn-outline-success flex-fill" onclick="fillCreds('USER-10022', 'student123')">
                         <i class="fa-solid fa-user-graduate me-1"></i> Student
                     </button>
                 </div>
@@ -203,7 +216,7 @@
 
             if (!username && !password) {
                 event.preventDefault();
-                alertMsg.innerText = 'Please enter your username/email and password.';
+                alertMsg.innerText = 'Please enter your User ID/Email and password.';
                 alertBox.classList.remove('d-none');
                 document.getElementById('username_input').focus();
                 return false;
@@ -211,7 +224,7 @@
 
             if (!username) {
                 event.preventDefault();
-                alertMsg.innerText = 'Please enter your username or email address.';
+                alertMsg.innerText = 'Please enter your User ID, username, or email address.';
                 alertBox.classList.remove('d-none');
                 document.getElementById('username_input').focus();
                 return false;

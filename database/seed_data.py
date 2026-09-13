@@ -39,6 +39,8 @@ def seed_database():
 
         print("1. Creating System Admin...")
         admin = User(
+            user_uid='USER-10001',
+            full_name='System Administrator',
             username='admin',
             email='admin@smartcollege.edu',
             role='Admin',
@@ -179,6 +181,8 @@ def seed_database():
 
                 # User Account for Faculty
                 f_user = User(
+                    user_uid=f"USER-{10001 + fac_count}",
+                    full_name=f"{fname} {lname}",
                     username=username,
                     email=email,
                     role='Faculty',
@@ -235,6 +239,8 @@ def seed_database():
 
                 # User account for student
                 s_user = User(
+                    user_uid=f"USER-{10001 + 20 + stu_count}",
+                    full_name=f"{fname} {lname}",
                     username=username,
                     email=email,
                     role='Student',

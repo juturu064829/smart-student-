@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Smart Student Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom Theme CSS with Cache Busting -->
+    <link rel="stylesheet" href="{{ static_version('css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .register-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+        }
+        .toggle-password-btn {
+            cursor: pointer;
+            border-left: none;
+            background: rgba(30, 41, 59, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-panel register-card">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-20 rounded-circle mb-3" style="width: 65px; height: 65px;">
+                <i class="fa-solid fa-user-plus fa-2x text-primary"></i>
+            </div>
+            <h3 class="fw-bold brand-font text-light mb-1">Create Account</h3>
+            <p class="text-muted small mb-0">Get your unique User ID & Academic Access</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        <i class="fa-solid {% if category in ['danger', 'warning'] %}fa-triangle-exclamation{% else %}fa-circle-check{% endif %} me-2"></i>
+                        <small class="fw-medium">{{ message }}</small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Client-side Error Box -->
+        <div id="clientErrorAlert" class="alert alert-warning alert-dismissible fade show d-none mb-4" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <small id="clientErrorMessage" class="fw-medium"></small>
+            <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('clientErrorAlert').classList.add('d-none')"></button>
+        </div>
+
+        <!-- Registration Form -->
+        <form id="registerForm" action="{{ url_for('auth.register') }}" method="POST" novalidate onsubmit="return validateRegisterForm(event)">
+            <!-- Full Name -->
+            <div class="mb-3">
+                <label for="full_name" class="form-label text-muted small fw-semibold">Full Name</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-id-card"></i></span>
+                    <input 
+                        type="text" 
+                        id="full_name" 
+                        name="full_name" 
+                        value="{{ full_name or '' }}"
+                        class="form-control" 
+                        placeholder="e.g. John Doe" 
+                        required 
+                        autofocus
+                    >
+                </div>
+            </div>
+
+            <!-- Email Address -->
+            <div class="mb-3">
+                <label for="email" class="form-label text-muted small fw-semibold">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-envelope"></i></span>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        value="{{ email or '' }}"
+                        class="form-control" 
+                        placeholder="john.doe@example.com" 
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="mb-3">
+                <label for="role" class="form-label text-muted small fw-semibold">Account Role</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-user-tag"></i></span>
+                    <select id="role" name="role" class="form-select bg-dark text-light border-secondary">
+                        <option value="Student" {% if role == 'Student' %}selected{% endif %}>Student</option>
+                        <option value="Faculty" {% if role == 'Faculty' %}selected{% endif %}>Faculty / Staff</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label text-muted small fw-semibold">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-lock"></i></span>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="At least 6 characters" 
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="input-group-text toggle-password-btn border-secondary text-muted" 
+                        onclick="toggleVisibility('password', 'passIcon1')"
+                    >
+                        <i id="passIcon1" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label text-muted small fw-semibold">Confirm Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fa-solid fa-shield-halved"></i></span>
+                    <input 
+                        type="password" 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        class="form-control" 
+                        placeholder="Re-enter password" 
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="input-group-text toggle-password-btn border-secondary text-muted" 
+                        onclick="toggleVisibility('confirm_password', 'passIcon2')"
+                    >
+                        <i id="passIcon2" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
+                <i class="fa-solid fa-user-check me-2"></i> Register & Generate User ID
+            </button>
+
+            <!-- Sign In Link -->
+            <div class="text-center pt-2 border-top border-secondary">
+                <p class="text-muted small mb-0">
+                    Already have an account? 
+                    <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none ms-1">
+                        Sign In
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-primary';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function validateRegisterForm(event) {
+            const name = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirm_password').value;
+            const alertBox = document.getElementById('clientErrorAlert');
+            const alertMsg = document.getElementById('clientErrorMessage');
+
+            if (!name || !email || !pass || !confirmPass) {
+                event.preventDefault();
+                alertMsg.innerText = 'Please fill in all registration fields.';
+                alertBox.classList.remove('d-none');
+                return false;
+            }
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                event.preventDefault();
+                alertMsg.innerText = 'Please enter a valid email address.';
+                alertBox.classList.remove('d-none');
+                return false;
+            }
+
+            if (pass.length < 6) {
+                event.preventDefault();
+                alertMsg.innerText = 'Password must be at least 6 characters long.';
+                alertBox.classList.remove('d-none');
+                return false;
+            }
+
+            if (pass !== confirmPass) {
+                event.preventDefault();
+                alertMsg.innerText = 'Passwords do not match.';
+                alertBox.classList.remove('d-none');
+                return false;
+            }
+
+            alertBox.classList.add('d-none');
+            return true;
+        }
+    </script>
+</body>
+</html>
